@@ -21,7 +21,7 @@ const ListCard: React.FC<TListCardProps> = ({ item }) => {
   return (
     <Link
       href={`/details/${item.objectNumber}`}
-      className="relative flex flex-col w-60 h-80 border border-gray-600 rounded-md m-4 overflow-hidden"
+      className="relative flex flex-col w-60 h-80 border border-gray-600 bg-slate-200 rounded-md m-4 overflow-hidden hover:-translate-y-2 hover:shadow-lg transition-all duration-100"
       key={item.id}
     >
       {item.hasImage ? (
