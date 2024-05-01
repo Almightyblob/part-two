@@ -11,7 +11,7 @@ export default function QCProvider({
       queries: {
         staleTime: 10 * 60 * 1000, // 10 minutes
         gcTime: 5 * 60 * 1000, // 5 minutes
-        refetchOnWindowFocus: true,
+        refetchOnWindowFocus: false,
       },
     },
   });
