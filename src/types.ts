@@ -166,3 +166,7 @@ export type TLabel = {
   notes: string;
   date: string;
 };
+
+export type TFetchdataArg = {
+  pageParam: number;
+};

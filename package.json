@@ -14,7 +14,9 @@
     "next": "14.2.3",
     "react": "^18",
     "react-dom": "^18",
-    "react-infinite-scroll-component": "^6.1.0"
+    "react-infinite-scroll-component": "^6.1.0",
+    "recoil": "^0.7.7",
+    "use-debounce": "^10.0.0"
   },
   "devDependencies": {
     "@types/node": "^20",

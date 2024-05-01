@@ -1,4 +1,6 @@
 "use client";
+import ErrorBanner from "@/components/ErrorBanner";
+import LoadingBanner from "@/components/LoadingBanner";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
@@ -19,11 +21,6 @@ const Detail: React.FC<TDetailParams> = ({ params }) => {
     queryKey: [params.id],
     queryFn: fetchData,
   });
-  console.log(process.env.NODE_ENV);
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>An error occurred: {error.message}</div>;
-
-  console.log(data);
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-between px-24 pt-12">
@@ -31,24 +28,40 @@ const Detail: React.FC<TDetailParams> = ({ params }) => {
         Back
       </Link>
       <div className="h-full">
+        {isLoading && <LoadingBanner />}
+        {error && <ErrorBanner />}
         <div className="relative w-full h-full border border-slate-400 rounded-lg p-6">
           <h1 className="absolute -top-5 bg-slate-300 text-3xl saira-condensed-bold uppercase text-orange-700 px-2">
             {data.artObject.title}
           </h1>
-          <Image
-            className="w-auto max-h-full"
-            width={data.artObject.webImage.width}
-            height={data.artObject.webImage.height}
-            src={data.artObject.webImage.url}
-            alt={data.artObject.title}
-          />
+          {data.artObject.webImage ? (
+            <Image
+              className="w-auto max-h-full"
+              width={data.artObject.webImage.width}
+              height={data.artObject.webImage.height}
+              src={data.artObject.webImage.url}
+              alt={data.artObject.title}
+              placeholder="blur"
+              blurDataURL="/placeholder.webp"
+            />
+          ) : (
+            <div className="grid place-content-center h-full w-full">
+              <div className="grid place-content-center h-32 w-32 rounded-full bg-orange-600 mb-8">
+                <h2 className="saira-condensed-thin text-white text-lg ">
+                  NO IMG
+                </h2>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-2 pt-4">
             <div className="p-4 border border-slate-400 rounded">
               <p className="text-sm saira-condensed-medium uppercase text-orange-700 mb-2">
                 Description
               </p>
               <p className="text-sm saira-condensed-light ml-4">
-                {data.artObject.plaqueDescriptionEnglish}
+                {data.artObject.plaqueDescriptionEnglish ||
+                  "No description available"}
               </p>
             </div>
             <div className="p-4">
@@ -56,7 +69,7 @@ const Detail: React.FC<TDetailParams> = ({ params }) => {
                 {data.artObject.scLabelLine}
               </p>
               <p className="text-sm saira-condensed-light">
-                {data.artObject.scLabelLine}
+                {data.artObject.subTitle}
               </p>
             </div>
           </div>

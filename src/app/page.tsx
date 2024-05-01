@@ -1,94 +1,95 @@
 "use client";
+import InfiniteScrollList from "@/components/InfiniteScrollList";
 import ListCard from "@/components/ListCard";
+import SearchForm from "@/components/SearchForm";
+import { fetchQueryData } from "@/helpers/fetchData";
 import { TListArtObject } from "@/types";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import InfiniteScroll from "react-infinite-scroll-component";
+import { useEffect, useRef, useState } from "react";
+import { useRecoilState } from "recoil";
+import { filterAtom, searchQueryAtom } from "./store/query.atom";
+import { useDebounce } from "use-debounce";
+import LoadingBanner from "@/components/LoadingBanner";
+import ErrorBanner from "@/components/ErrorBanner";
 
-type TFetchdataArg = {
-  pageParam: number;
-};
-
-const Home = () => {
+const HomeContent = () => {
   const [allData, setAllData] = useState<TListArtObject[]>([]);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [searchQuery, setSearchQuery] = useRecoilState(searchQueryAtom);
+  const [filter, setFilter] = useRecoilState(filterAtom);
+  const currentPage = useRef(0);
+  const [debouncedSearchQuery] = useDebounce(searchQuery, 500);
+  const query = `q=${debouncedSearchQuery}&s=${filter}`;
 
-  function fetchData({ pageParam }: TFetchdataArg) {
-    return fetch(
-      `https://www.rijksmuseum.nl/api/en/collection?key=${process.env.API_KEY}&q=rembrandt&ps=10&p=${pageParam}`
-    ).then((res) => res.json());
-  }
+  console.log(query);
 
-  const {
-    fetchNextPage,
-    fetchPreviousPage,
-    hasNextPage,
-    hasPreviousPage,
-    isFetchingNextPage,
-    isFetchingPreviousPage,
-    ...result
-  } = useInfiniteQuery({
-    queryKey: ["base"],
-    queryFn: (pageParam) => fetchData(pageParam),
-    initialPageParam: 1,
-    getNextPageParam: () => {
-      return currentPage + 1;
-    },
-    getPreviousPageParam: (
-      firstPage,
-      allPages,
-      firstPageParam,
-      allPageParams
-    ) => {
-      return firstPage.prevCursor;
-    },
-  });
+  const { fetchNextPage, hasNextPage, hasPreviousPage, ...result } =
+    useInfiniteQuery({
+      enabled: searchQuery.length > 0,
+      queryKey: [query],
+      queryFn: (pageParam) => fetchQueryData(pageParam, query),
+      initialPageParam: 1,
+      getNextPageParam: () => {
+        return currentPage.current + 1;
+      },
+    });
 
   const { data, isLoading, error } = result;
 
   useEffect(() => {
     if (data?.pages) {
+      // reactquery automatically accumulates the fetched pages for us,
+      // we just need to flatten the results
       setAllData(data.pages?.flatMap((page) => page.artObjects));
-      setCurrentPage(data.pages.length);
+      // Since the API doesn't provid us with a way to keep track of pagination
+      // we need to do it ourselves.
+      currentPage.current = data.pages.length;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.pages.length]);
 
-  if (isLoading) return <div className="min-h-screen">Loading...</div>;
-  if (error) return <div>An error occurred: {error.message}</div>;
+  // Again, the API provised no info on the current position in the pagination
+  // and if here are any more pages. However, if the last fetched page has less
+  // than 10 items in it, we definitely reached the end of the results.
+  const hasMore = data?.pages[data.pages.length - 1].artObjects.length === 10;
 
   console.log(data);
 
   return (
-    <main className="min-h-screen p-24">
-      {allData && allData.length !== 0 && (
-        <InfiniteScroll
-          dataLength={allData.length || 0} //This is important field to render the next data
-          next={() => {
-            console.log("fetching!");
-            fetchNextPage();
-          }}
-          hasMore={currentPage !== null}
-          loader={
-            <div className="flex flex-row justify-center bg-orange-600 rounded-md">
-              <h4 className="text-white saira-condensed-bold">Loading...</h4>
+    <main className="min-h-screen">
+      <div className="w-full h-28 bg-orange-500 pt-3">
+        <div className="grid place-content-center mb-2">
+          <h1 className="saira-condensed-black text-4xl uppercase">
+            <span className="text-white">Rijks</span>
+            <span className="text-slate-700">Museum</span>
+          </h1>
+        </div>
+        <SearchForm
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          filter={filter}
+          setFilter={setFilter}
+        />
+      </div>
+      <div className="py-12 px-4 lg:px-12">
+        {isLoading && <LoadingBanner />}
+        {error && <ErrorBanner />}
+
+        {allData && allData.length !== 0 && (
+          <InfiniteScrollList
+            length={allData.length || 0} //This is important field to render the next data
+            handleFetchNext={fetchNextPage}
+            hasMore={hasMore}
+          >
+            <div className="flex flex-col items-center sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
+              {allData.map((item) => (
+                <ListCard key={item.id} item={item} />
+              ))}
             </div>
-          }
-          endMessage={
-            <p style={{ textAlign: "center" }}>
-              <b>Yay! You have seen it all</b>
-            </p>
-          }
-        >
-          <div className="flex flex-row flex-wrap">
-            {allData.map((item) => (
-              <ListCard key={item.id} item={item} />
-            ))}
-          </div>
-        </InfiniteScroll>
-      )}
+          </InfiniteScrollList>
+        )}
+      </div>
     </main>
   );
 };
 
-export default Home;
+export default HomeContent;
