@@ -1,20 +1,11 @@
-import { QueryClient } from "@tanstack/react-query";
-import React, { Dispatch, SetStateAction } from "react";
-import { queryClient } from "./QCProvider";
+import React from "react";
+import { useRecoilState } from "recoil";
+import { filterAtom, searchQueryAtom } from "@/app/store/query.atom";
 
-type TSearchFormProps = {
-  searchQuery: string;
-  setSearchQuery: Dispatch<SetStateAction<string>>;
-  filter: string;
-  setFilter: Dispatch<SetStateAction<string>>;
-};
+const SearchForm: React.FC<{}> = () => {
+  const [searchQuery, setSearchQuery] = useRecoilState(searchQueryAtom);
+  const [filter, setFilter] = useRecoilState(filterAtom);
 
-const SearchForm: React.FC<TSearchFormProps> = ({
-  searchQuery,
-  setSearchQuery,
-  filter,
-  setFilter,
-}) => {
   return (
     <form
       className="w-full flex flex-row justify-center items-center"
@@ -42,7 +33,7 @@ const SearchForm: React.FC<TSearchFormProps> = ({
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
         >
-          <option value="artist">Name (ask)</option>
+          <option value="artist">Name (asc)</option>
           <option value="artistdesc">Name (desc)</option>
           <option value="relevance">relevance</option>
           <option value="objecttype">objecttype</option>

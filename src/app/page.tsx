@@ -14,8 +14,8 @@ import ErrorBanner from "@/components/ErrorBanner";
 
 const HomeContent = () => {
   const [allData, setAllData] = useState<TListArtObject[]>([]);
-  const [searchQuery, setSearchQuery] = useRecoilState(searchQueryAtom);
-  const [filter, setFilter] = useRecoilState(filterAtom);
+  const [searchQuery] = useRecoilState(searchQueryAtom);
+  const [filter] = useRecoilState(filterAtom);
   const currentPage = useRef(0);
   const [debouncedSearchQuery] = useDebounce(searchQuery, 500);
   const query = `q=${debouncedSearchQuery}&s=${filter}`;
@@ -63,12 +63,7 @@ const HomeContent = () => {
             <span className="text-slate-700">Museum</span>
           </h1>
         </div>
-        <SearchForm
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          filter={filter}
-          setFilter={setFilter}
-        />
+        <SearchForm />
       </div>
       <div className="py-12 px-4 lg:px-12">
         {isLoading && <LoadingBanner />}
@@ -76,7 +71,7 @@ const HomeContent = () => {
 
         {allData && allData.length !== 0 && (
           <InfiniteScrollList
-            length={allData.length || 0} //This is important field to render the next data
+            length={allData.length || 0}
             handleFetchNext={fetchNextPage}
             hasMore={hasMore}
           >
