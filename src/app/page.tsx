@@ -7,7 +7,7 @@ import { TListArtObject } from "@/types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState } from "recoil";
-import { filterAtom, searchQueryAtom } from "./store/query.atom";
+import { filterAtom, searchQueryAtom } from "@/store/query.atom";
 import { useDebounce } from "use-debounce";
 import LoadingBanner from "@/components/LoadingBanner";
 import ErrorBanner from "@/components/ErrorBanner";

@@ -1,6 +1,6 @@
 import React from "react";
 import { useRecoilState } from "recoil";
-import { filterAtom, searchQueryAtom } from "@/app/store/query.atom";
+import { filterAtom, searchQueryAtom } from "@/store/query.atom";
 
 const SearchForm: React.FC<{}> = () => {
   const [searchQuery, setSearchQuery] = useRecoilState(searchQueryAtom);
